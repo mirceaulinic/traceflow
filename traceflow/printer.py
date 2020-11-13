@@ -91,6 +91,10 @@ class printer:
         return None
 
     @staticmethod
+    def print_json(traces):
+        print(json.dumps(traces))
+
+    @staticmethod
     def _build_nodes(traces: dict) -> dict:
         max_ttl = max([max(traces[i].keys()) for i in traces.keys()])
         nodes = dict()

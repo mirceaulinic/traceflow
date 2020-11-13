@@ -42,7 +42,11 @@ def get_help() -> argparse:
     )
     parser.add_argument(
         "--format",
-        help="Print the results vertically (--format=vert) or horizontally (--format=horiz), or even represented in a web browser (--format=viz)",
+        help=(
+            "Print the results vertically (--format=vert) or horizontally "
+            "(--format=horiz), or even represented in a web browser "
+            "(--format=viz), or displayed as JSON."
+        ),
         default="vert",
         type=str,
     )
@@ -56,6 +60,11 @@ def get_help() -> argparse:
         "--dedup", help="De-duplicate the traceflow results", action="store_true"
     )
     parser.add_argument("--debug", help="Enable Debug Logging", action="store_true")
+    parser.add_argument(
+        "--quiet",
+        help="Don't print any messages on the command line (other than the result)",
+        action="store_true",
+    )
 
     # Positional Arguments
     parser.add_argument("destination", action="store", type=str)

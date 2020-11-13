@@ -20,14 +20,19 @@ def main():
     max_ttl = args.ttl
     bind_ip = args.bind
     to_wait = args.wait
+    quiet = args.quiet
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
     if tot_runs > 255:
-        logger.warning(f"Max paths we can probe is 255. Setting --paths to 255 and continuing")
+        logger.warning(
+            f"Max paths we can probe is 255. Setting --paths to 255 and continuing"
+        )
         tot_runs = 255
 
-    traces = compute_traces(daddr, tot_runs, dst_port, src_port, max_ttl, to_wait)
+    traces = compute_traces(
+        daddr, tot_runs, dst_port, src_port, max_ttl, to_wait, quiet
+    )
 
     if args.dedup:
         traces = helpers.remove_duplicate_paths(traces)
@@ -40,6 +45,8 @@ def main():
     if args.format.lower() == "viz":
         # Experimental vis.js / browser based visualisation
         traceflow.printer.start_viz(traces, bind_ip)
+    if args.format.lower() == "json":
+        traceflow.printer.print_json(traces)
     exit(0)
 
 
@@ -57,7 +64,15 @@ def resolve_address(dest):
     return daddr
 
 
-def compute_traces(daddr, tot_runs=4, dst_port=33452, src_port=33452, max_ttl=64, to_wait=0.1):
+def compute_traces(
+    daddr,
+    tot_runs=4,
+    dst_port=33452,
+    src_port=33452,
+    max_ttl=64,
+    to_wait=0.1,
+    quiet=False,
+):
     # Setup the background thread listener here.
     # Note that we need to pass daddr
     # so we can snag the dst port unreachable ICMP message.
@@ -69,7 +84,8 @@ def compute_traces(daddr, tot_runs=4, dst_port=33452, src_port=33452, max_ttl=64
     for path in range(1, tot_runs + 1):
         port = src_port + path
         run_ids[path] = port
-        print(f"Looking at Path ID {path} (src port:{port} , dst port:{dst_port})")
+        if not quiet:
+            print(f"Looking at Path ID {path} (src port:{port} , dst port:{dst_port})")
         for ttl in list(range(1, max_ttl)):
             # Here we will combine the path we're after with the TTL,
             # and use this to track the returning ICMP payload
